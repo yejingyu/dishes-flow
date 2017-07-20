@@ -1,0 +1,8 @@
+INSERT INTO menu(id, name, price, available) VALUES (1, 'Special Bowl', 8.75,true);
+INSERT INTO menu(id, name, price, available) VALUES (2, 'Rice Noodle soup', 8.25,true);
+INSERT INTO menu(id, name, price, available) VALUES (3, 'Rice with mignon steak', 7.75,true);
+
+INSERT INTO employee(id, password, position) VALUES ('aaa', '123456','mana');
+INSERT INTO employee(id, password, position) VALUES ('bbb', '123456','wait');
+INSERT INTO employee(id, password, position) VALUES ('ccc', '123456','cook');
+INSERT INTO employee(id, password, position) VALUES ('ddd', '123456','cash');
