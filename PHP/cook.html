@@ -1,0 +1,370 @@
+<!-- 
+# Copyright © 2017 Jingyu Ye
+# This program is licensed under the MIT License.
+# Please see the file LICENSE in this distribution for
+# license terms.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Cook Page</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/theme.css" rel="stylesheet">
+    
+      
+    <script>
+      var ingredient_set = [];
+    
+      //get the new menu data(available or not) and replace the old one
+      function refresh_order_list()
+      {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+          if (this.readyState == 4 && this.status == 200)
+            document.getElementById("order_list").innerHTML = this.responseText;
+        };
+        xhttp.open("get", "cook/order_list_cook.php", true);
+        xhttp.send();
+      }
+      
+      //refresh the ingredient list in stock Tab
+      function refresh_ingredient_list()
+      {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+          if (this.readyState == 4 && this.status == 200)
+            document.getElementById("ingredient_list").innerHTML = this.responseText;
+        };
+        xhttp.open("get", "cook/ingredient_list.php", true);
+        xhttp.send();
+      }
+      
+      //allow user to choose the ingredient by clicking the table.
+      //This function would save the ingredient data and display it into a list
+      function load_ingredient(id,name)
+      {
+        var buffer =[id,name];
+        var last_item = ingredient_set.length;
+        ingredient_set.push(buffer);
+        document.getElementById("menu_editing_ingredient_list").innerHTML += "<tr><td><button type='button' class='btn btn-xs btn-danger' onclick='delete_menu_editing_ingredient("+last_item+")'>X</button></td><td>"
+                                                        +ingredient_set[last_item][0]+"</td><td>"
+                                                        +ingredient_set[last_item][1]+"</td><tr>";
+      }
+      
+      //delete item from the non-submit current order
+      function delete_menu_editing_ingredient(index)
+      {
+        ingredient_set.splice(index, 1);
+        //renew the order table
+        document.getElementById("menu_editing_ingredient_list").innerHTML = "";
+        for(var i=0; i < order_set.length;i++)
+        {
+          document.getElementById("menu_editing_ingredient_list").innerHTML += "<tr><td><button type='button' class='btn btn-xs btn-danger' onclick='delete_order("+i+")'>X</button></td><td>"
+                                                          +ingredient_set[last_item][0]+"</td><td>"+order_set[i][1]+"</td><td>"
+                                                          +ingredient_set[last_item][1]+"</td><tr>";
+        }
+      }
+      
+      //refresh the ingredient list in Menu Change Tab
+      function refresh_menu_editing_ingredient()
+      {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+          if (this.readyState == 4 && this.status == 200)
+            document.getElementById("menu_editing_ingredient").innerHTML = this.responseText;
+        };
+        xhttp.open("get", "cook/refresh_menu_editing_ingredient.php", true);
+        xhttp.send();
+      }
+      
+      //add an ingredient to database
+      function add_ingredient()
+      {
+        var name = document.getElementById("ingredient_name").value;
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+          if (this.readyState == 4 && this.status == 200)
+          {
+            document.getElementById("add_ingre_result").innerHTML = this.responseText;
+            refresh_ingredient_list();
+          }
+        };
+        xhttp.open("post", "cook/add_ingredient.php?name="+name, true);
+        xhttp.send();
+      }
+
+      //check there is input or not, if not display error to user
+      function is_inputed(input, error_block_id)
+      {
+        if(input.length >0)
+        {
+          document.getElementById(error_block_id).style.visibility = "hidden";
+          return true;
+        }
+        document.getElementById(error_block_id).style.visibility = "visible";
+        return false;
+      }
+      
+      //edit the ingredient availablity. Then renew the ingredient list
+      function edit_ingredient_status(id,available)
+      {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+          if (this.readyState == 4 && this.status == 200)
+          {
+            document.getElementById("order_list").innerHTML = this.responseText;
+            refresh_ingredient_list();
+          }
+        };
+        xhttp.open("get", "cook/missing_food.php?id="+id+"&available="+available, true);
+        xhttp.send();
+      }
+      
+      //delete item from the non-submit current order
+      function delete_order(index)
+      {
+        order_set.splice(index, 1);
+        //renew the order table
+        document.getElementById("curr_order").innerHTML = "";
+        for(var i=0; i < order_set.length;i++)
+        {
+          document.getElementById("curr_order").innerHTML += "<tr><td><button type='button' class='btn btn-xs btn-danger' onclick='delete_order("+i+")'>X</button></td><td>"
+                                                          +order_set[i][0]+"</td><td>"+order_set[i][1]+"</td><td>"
+                                                          +order_set[i][2]+"</td><tr>";
+        }
+      }
+      
+      //set the stutes of an ordered item to given status
+      function edit_order_status(id, status)
+      {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+          if (this.readyState == 4 && this.status == 200)
+            refresh_order_list();
+        };
+        xhttp.open("get", "edit_order_status.php?status="+status+"&id=" + id, true);
+        xhttp.send();
+      }
+      
+      //add new dish to the menu
+      function add_food()
+      {
+        var name = document.getElementById("food_name").value;
+        var price = document.getElementById("food_price").value;
+        var xhttp = new XMLHttpRequest();
+        var counter = 0;
+        
+        //add the dish
+        xhttp.onreadystatechange = function()
+        {
+          if (this.readyState == 4 && this.status == 200)
+            id = this.responseText;
+        };
+        
+        var now = new Date().getTime();
+        xhttp.open("get", "cook/add_food.php?name="+name+"&price=" + price, true);
+        xhttp.send();
+        while(new Date().getTime() < now + 500){counter++;}
+        
+        //link the dish with ingredient
+        for(var i = 0; i < ingredient_set.length;i++)
+        {
+          add_ingredient_list(ingredient_set[i][0]);
+        }
+        //after upload, delete the local data
+        for(var i=ingredient_set.length-1; i >=0;i--)
+        {
+          ingredient_set.splice(i, 1);
+        }
+        document.getElementById("menu_editing_ingredient_list").innerHTML = "";
+        document.getElementById("food_name").value = "";
+        document.getElementById("food_price").value = "";
+      }
+      
+      //link a dish with ingredient
+      function add_ingredient_list(ingredient_id)
+      {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+          if (this.readyState == 4 && this.status == 200)
+            document.getElementById("add_food_return").innerHTML += this.responseText;
+        };
+        xhttp.open("get", "cook/add_ingredient_list.php?ingredientid=" + ingredient_id, true);
+        xhttp.send();
+      }
+    </script>
+  </head>
+
+  <body>
+    <!-- Fixed navbar Header -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Tool Bar</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand">Current Login: Cook</a>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li class="active"><a data-toggle="tab" href="#order">Order</a></li>
+              <li><a data-toggle="tab" href="#stock">Stock</a></li>
+              <li><a data-toggle="tab" href="#menu">Menu Change</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div><!--/.navbar-header -->
+      </div><!--/.container -->
+    </nav>
+
+
+    <!-- Main content -->
+    <div class="tab-content">
+      <div class="page-header">
+      </div>
+      <div class="page-header">
+      </div>
+
+      <!-- Order -->
+      <div id="order" class="tab-pane fade in active">
+        <h1>Order
+            <button type="button" class="btn btn-default" onclick="refresh_order_list()">Renew</button>
+        </h1>
+        <table class="table table-condensed">
+          <thead>
+            <tr>
+              <th> Cancel </th>
+              <th> id </th>
+              <th> Name </th>
+              <th> Quantity </th>
+              <th> Comment </th>
+              <th>  </th>
+              <th>  </th>
+            </tr>
+          </thead>
+          <tbody id="order_list">
+            <script>refresh_order_list()</script>
+          </tbody>
+        </table>
+        </form>
+      </div> <!--/.id=Order -->
+      
+      <!-- stock -->
+      <div id="stock" class="tab-pane fade">
+        <div class="col-xs-3">
+          <h1>Stock</h1>
+          <table class="table table-condensed">
+            <thead>
+              <tr>
+                <th>  </th>
+                <th> Name </th>
+              </tr>
+            </thead>
+            <tbody id="ingredient_list">
+              <script>refresh_ingredient_list()</script>
+            </tbody>
+          </table>
+          <dir id="stock_result">
+          </dir>
+        </div>
+        <div class="col-xs-6">
+          <h1>Add New ingredient
+            <button type="button" class="btn btn-default" onclick="add_ingredient()">Submit</button>
+          </h1>
+          <samp>Name:</samp>
+          <input type="text" id="ingredient_name"></br>
+          <samp id="add_ingre_result"></samp>
+        </div>
+      </div> <!--/stock -->
+      
+      <!-- Menu -->
+      <div id="menu" class="tab-pane fade">
+        <div class="col-xs-6">
+          <h1>Ingredient
+            <button type="button" class="btn btn-default" onclick="refresh_menu_editing_ingredient()">Renew</button>
+          </h1>
+          <p>Click the item below to link ingredient with the food you are going to add</p>
+          <table class="table">
+            <thead>
+              <tr>
+                <th> ID </th>
+                <th> Name </th>
+              </tr>
+            </thead>
+            <tbody id="menu_editing_ingredient">
+              <script>refresh_menu_editing_ingredient()</script>
+            </tbody>
+          </table>
+        </div> <!--/.col-xs-6 Menu -->
+        <div class="col-xs-6">
+          <h1>Add Dish to Menu
+            <button type="button" class="btn btn-default" onclick="add_food()">Add</button>
+            <samp id="add_food_return"></samp>
+          </h1>
+          <table class="table">
+            <tr>
+              <td>Name:</td>
+              <td><input type="text" id="food_name"></td>
+            </tr>
+            <tr>
+              <td>Price:</td>
+              <td>
+                <input type="text" id="food_price">
+              </td>
+            </tr>
+          </table>
+          <h3>Ingredient List
+          </h3>
+          <table class="table table-condensed">
+            <thead>
+              <tr>
+                <th> Delete </th>
+                <th> Ingredient ID </th>
+                <th> Ingredient Name </th>
+              </tr>
+            </thead>
+            <tbody id="menu_editing_ingredient_list">
+            </tbody>
+          </table>
+          <div id="return">
+          </div>
+        </div> <!--/.col-xs-6 Add Item -->
+      </div> <!--/.id=Menu -->
+    </div> <!-- /container -->
+
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/docs.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="js/ie10-viewport-bug-workaround.js"></script>
+    </body>
+  </body>
+</html>

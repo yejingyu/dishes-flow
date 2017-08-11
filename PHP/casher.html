@@ -1,0 +1,148 @@
+<!-- 
+# Copyright © 2017 Jingyu Ye
+# This program is licensed under the MIT License.
+# Please see the file LICENSE in this distribution for
+# license terms.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Wait Staff Page</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/theme.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+    
+      
+    <script>
+      //check there is input or not, if not display error to user
+      function is_inputed(input, error_block_id)
+      {
+        if(input.length >0)
+        {
+          document.getElementById(error_block_id).style.visibility = "hidden";
+          return true;
+        }
+        document.getElementById(error_block_id).style.visibility = "visible";
+        return false;
+      }
+
+      //get the order of a table, only status is "order" would be return.
+      function get_invoice()
+      {
+        var table_id = document.getElementById("table_id").value;
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+          if (this.readyState == 4 && this.status == 200)
+            document.getElementById("invoice_table").innerHTML = this.responseText;
+        };
+        if(is_inputed(table_id, "table_id_missing"))
+        {
+          xhttp.open("get", "casher/get_invoice.php?tableid=" + table_id, true);
+          xhttp.send();
+        }
+      }
+      
+      //get the order of a table, only status is "order" would be return.
+      function pay_invoice()
+      {
+        var table_id = document.getElementById("table_id").value;
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+          if (this.readyState == 4 && this.status == 200)
+            document.getElementById("invoice_table").innerHTML = this.responseText;
+        };
+        if(is_inputed(table_id, "table_id_missing"))
+        {
+          xhttp.open("get", "casher/pay_invoice.php?tableid=" + table_id, true);
+          xhttp.send();
+        }
+      }
+    </script>
+  </head>
+
+  <body>
+    <!-- Fixed navbar Header -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Tool Bar</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand">Current Login: Casher</a>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li class="active"><a data-toggle="tab" href="#invoice">Invoice</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div><!--/.navbar-header -->
+      </div><!--/.container -->
+    </nav>
+
+
+    <!-- Main content -->
+    <div class="tab-content">
+      <div class="page-header">
+      </div>
+      <div class="page-header">
+      </div>
+
+      <!-- Invoice -->
+      <div id="invoice" class="tab-pane fade in active">
+        <h1>Invoice
+        </h1>
+        <p>
+          Table ID:
+          <input type="text" id="table_id" onkeyup="is_inputed(this.value,'table_id_missing')">
+          <span style="color:red; visibility:hidden;" id="table_id_missing">Table ID Missing</span>
+          <button type="button" class="btn btn-info" onclick="get_invoice()">Check</button>
+          <button type="button" class="btn btn-success" onclick="pay_invoice()">Pay</button>
+        </p>
+        <table class="table table-condensed">
+          <thead>
+            <tr>
+              <th> Item </th>
+              <th> Quantity </th>
+              <th> Price </th>
+              <th> Total </th>
+            </tr>
+          </thead>
+          <tbody id="invoice_table">
+          </tbody>
+        </table>
+      </div> <!--/Invoice -->
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/docs.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>

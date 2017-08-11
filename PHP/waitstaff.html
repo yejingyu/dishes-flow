@@ -1,0 +1,313 @@
+<!-- 
+# Copyright © 2017 Jingyu Ye
+# This program is licensed under the MIT License.
+# Please see the file LICENSE in this distribution for
+# license terms.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Wait Staff Page</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/theme.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+    
+      
+    <script>
+      var order_set = [];
+
+      //get the new menu data(available or not) and replace the old one
+      function refresh_menu()
+      {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+          if (this.readyState == 4 && this.status == 200)
+            document.getElementById("order_menu").innerHTML = this.responseText;
+        };
+        xhttp.open("get", "waitstaff/order_menu.php", true);
+        xhttp.send();
+      }
+      
+      //when user click the item on the menu, load the value to order dir
+      function load_order(id,name)
+      {
+        document.getElementById("order_name").innerHTML = name;
+        document.getElementById("food_id").value = id;
+        document.getElementById("quantity").value = 1;
+      }
+      
+      //add 1 quantity of item
+      function add_quantity()
+      {
+        document.getElementById("quantity").value++;
+      }
+
+      //reduce 1 quantity of item
+      function reduce_quantity()
+      {
+        document.getElementById("quantity").value--;
+        if(document.getElementById("quantity").value < 1)
+          document.getElementById("quantity").value = 1;
+      }
+
+      //check there is input or not, if not display error to user
+      function is_inputed(input, error_block_id)
+      {
+        if(input.length >0)
+        {
+          document.getElementById(error_block_id).style.visibility = "hidden";
+          return true;
+        }
+        document.getElementById(error_block_id).style.visibility = "visible";
+        return false;
+      }
+      
+      //add the current order to a list, so that the list can be use for submition
+      function add_order()
+      {
+        var buffer = [document.getElementById("food_id").value,
+                      document.getElementById("quantity").value,
+                      document.getElementById("comment").value
+                     ];
+        var last_item = order_set.length;
+        order_set.push(buffer);
+        document.getElementById("curr_order").innerHTML += "<tr><td><button type='button' class='btn btn-xs btn-danger' onclick='delete_order("+last_item+")'>X</button></td><td>"
+                                                        +order_set[last_item][0]+"</td><td>"
+                                                        +order_set[last_item][1]+"</td><td>"
+                                                        +order_set[last_item][2]+"</td><tr>";
+        document.getElementById("return").innerHTML = "";
+      }
+      
+      //delete item from the non-submit current order
+      function delete_order(index)
+      {
+        order_set.splice(index, 1);
+        //renew the order table
+        document.getElementById("curr_order").innerHTML = "";
+        for(var i=0; i < order_set.length;i++)
+        {
+          document.getElementById("curr_order").innerHTML += "<tr><td><button type='button' class='btn btn-xs btn-danger' onclick='delete_order("+i+")'>X</button></td><td>"
+                                                          +order_set[i][0]+"</td><td>"+order_set[i][1]+"</td><td>"
+                                                          +order_set[i][2]+"</td><tr>";
+        }
+      }
+      
+      //submit the order to database
+      function submit_order()
+      {
+        var table_id = document.getElementById("table_id").value;
+        var collecter = 0;
+        
+        //only submit if table id is not missing
+        if(is_inputed(table_id, "table_id_missing"))
+        {
+          document.getElementById("curr_order").innerHTML = "";
+          for(var i = 0; i < order_set.length;i++)
+          {
+            submit_order_helper(table_id,order_set[i][0],order_set[i][1],order_set[i][2]);
+          }
+          //after upload, delete the local order list
+          for(var i=order_set.length-1; i >=0;i--)
+          {
+            order_set.splice(i, 1);
+          }
+        }
+      }
+      
+      //submit each item in the order to database
+      function submit_order_helper(tableid,foodid,quantity,comment)
+      {
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("post", "waitstaff/add_order.php?tableid="+ tableid +"&foodid=" + foodid +"&quantity=" + quantity + "&comment=" + comment, true);
+        xmlhttp.send();
+        xmlhttp.onreadystatechange = function()
+        {
+          if (this.readyState == 4 && this.status == 200)
+          {
+            document.getElementById("return").innerHTML += this.responseText + foodid + "</br>";
+          }
+        };
+      }
+
+      //get the order of a table, only status is "order" would be return.
+      function get_order_list()
+      {
+        var table_id = document.getElementById("cancel_table_id").value;
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+          if (this.readyState == 4 && this.status == 200)
+            document.getElementById("cancel_list").innerHTML = this.responseText;
+        };
+        if(is_inputed(table_id, "cancel_table_id_missing"))
+        {
+          xhttp.open("get", "waitstaff/order_list.php?tableid=" + table_id, true);
+          xhttp.send();
+        }
+      }
+      
+      //set the stutes of an ordered item to given 'cancel'
+      function edit_order_status(id, status)
+      {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function()
+        {
+          if (this.readyState == 4 && this.status == 200)
+            get_order_list();
+        };
+        xhttp.open("get", "edit_order_status.php?status="+status+"&id=" + id, true);
+        xhttp.send();
+      }
+    </script>
+  </head>
+
+  <body>
+    <!-- Fixed navbar Header -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Tool Bar</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand">Current Login: Waiting staff</a>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li class="active"><a data-toggle="tab" href="#menu">Menu</a></li>
+              <li><a data-toggle="tab" href="#cancel">Cancel Order</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div><!--/.navbar-header -->
+      </div><!--/.container -->
+    </nav>
+
+
+    <!-- Main content -->
+    <div class="tab-content">
+      <div class="page-header">
+      </div>
+      <div class="page-header">
+      </div>
+
+      <!-- Menu -->
+      <div id="menu" class="tab-pane fade in active">
+        <div class="col-xs-6">
+          <h1>Menu
+            <button type="button" class="btn btn-default" onclick="refresh_menu()">Renew</button>
+          </h1>
+          <table class="table">
+            <thead>
+              <tr>
+                <th> ID </th>
+                <th> Name </th>
+                <th> Price </th>
+              </tr>
+            </thead>
+            <tbody id="order_menu">
+              <script>refresh_menu()</script>
+            </tbody>
+          </table>
+        </div> <!--/.col-xs-6 Menu -->
+        <div class="col-xs-6">
+          <h1>Add Item
+            <button type="button" class="btn btn-default" onclick="add_order()">Add</button>
+          </h1>
+          <table class="table">
+            <tr>
+              <td>ID:<input type="text" id="food_id"></td>
+              <td id="order_name"></td>
+            </tr>
+            <tr>
+              <td>Quantity:</td>
+              <td>
+                <input type="text" id="quantity">
+                <button type="button" class="btn btn-default" onclick="add_quantity()">+</button>
+                <button type="button" class="btn btn-default" onclick="reduce_quantity()">-</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Comment:</td>
+              <td><input type="text" id="comment"></td>
+            </tr>
+          </table>
+          <h1>Order
+            <button type="button" class="btn btn-default" onclick="submit_order()">Submit</button>
+          </h1>
+          <p>
+            Table ID:
+            <input type="text" id="table_id" onkeyup="is_inputed(this.value,'table_id_missing')">
+            <span style="color:red; visibility:hidden;" id="table_id_missing">Table ID Missing</span>
+          </p>
+          <table class="table table-condensed">
+            <thead>
+              <tr>
+                <th> Delete </th>
+                <th> Food ID </th>
+                <th> Quantity </th>
+                <th> Comment </th>
+              </tr>
+            </thead>
+            <tbody id="curr_order">
+            </tbody>
+          </table>
+          <div id="return">
+          </div>
+        </div> <!--/.col-xs-6 Add Item -->
+      </div> <!--/.id=Menu -->
+      <!-- Cancel Order -->
+      <div id="cancel" class="tab-pane fade">
+        <h1>Cancel Order
+        </h1>
+        <p>
+          Table ID:
+          <input type="text" id="cancel_table_id" onkeyup="is_inputed(this.value,'cancel_table_id_missing')">
+          <span style="color:red; visibility:hidden;" id="cancel_table_id_missing">Table ID Missing</span>
+          <button type="button" class="btn btn-default" onclick="get_order_list()">Submit</button>
+        </p>
+        <table class="table table-condensed">
+          <thead>
+            <tr>
+              <th> Cancel </th>
+              <th> Food ID </th>
+              <th> Quantity </th>
+              <th> Comment </th>
+            </tr>
+          </thead>
+          <tbody id="cancel_list">
+          </tbody>
+        </table>
+      </div> <!--/cancel_order -->
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/docs.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>

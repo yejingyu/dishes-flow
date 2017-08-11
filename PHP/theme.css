@@ -1,0 +1,25 @@
+<!-- 
+# Copyright © 2016 Twitter
+# This program is licensed under the MIT License.
+# Please read https://getbootstrap.com/docs/3.3/getting-started/#license-faqs for
+# license terms.
+-->
+
+body {
+  padding-top: 70px;
+  padding-bottom: 30px;
+}
+
+.theme-dropdown .dropdown-menu {
+  position: static;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.theme-showcase > p > .btn {
+  margin: 5px 0;
+}
+
+.theme-showcase .navbar .container {
+  width: auto;
+}
