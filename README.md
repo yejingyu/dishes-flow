@@ -3,15 +3,16 @@
 Copyright © 2017 Jingyu Ye
 
 Name: Jingyu Ye
+
 email address:jingyu2*pdx.edu (please replace * with @)
 
 Dishes Flow is a order tracking system for restaurants. It helps wait staff, cook, and cashier check the current order and the state of the order. Also, manager can use the statistics to understand the restaurant.
 
-Dishes Flow is written in PHP and SQL. The front-end framework is Bootstrap 3.3.7.
+Dishes Flow is written in PHP, SQL, and JS Ajax. The front-end framework is Bootstrap 3.3.7.
 
 This project is still in progress. Its functionality is not complete, and its design might be changed.
 
-Environment:
+##Environment:
 
 Dishes-flow has been test on the environment below:
 
@@ -23,7 +24,7 @@ Dishes-flow has been test on the environment below:
 
 Due to my accessibility to any environment, further testing is not planed. However, I would be glad if anyone told me about how this program works on their environment.
 
-Usage:
+##Usage:
 
 To set up dishes-flow on your server, please follow the instructions below. Because this project is still in progress. the instructions and files may change:
 
@@ -37,7 +38,7 @@ To set up dishes-flow on your server, please follow the instructions below. Beca
 
 5. Now you are free to go. The entrance of dishes-flow is PHP/index.html. Have fun.
 
-Done:
+##Done:
 
 * Wait staff menu
 
@@ -63,7 +64,7 @@ Done:
     caculation and printing receipt
     
     
-To Do:
+##To Do:
 
 * user management and login system
 
@@ -84,5 +85,6 @@ To Do:
     Worker management
     
     statistics of dishes, ingredients, and table usage.
-    
+
+## License     
 This work is under the MIT license. Please read the file LICENSE for license terms.
