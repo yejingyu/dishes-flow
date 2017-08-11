@@ -12,7 +12,7 @@ Dishes Flow is written in PHP, SQL, and JS Ajax. The front-end framework is Boot
 
 This project is still in progress. Its functionality is not complete, and its design might be changed.
 
-##Environment:
+## Environment:
 
 Dishes-flow has been test on the environment below:
 
@@ -24,7 +24,7 @@ Dishes-flow has been test on the environment below:
 
 Due to my accessibility to any environment, further testing is not planed. However, I would be glad if anyone told me about how this program works on their environment.
 
-##Usage:
+## Usage:
 
 To set up dishes-flow on your server, please follow the instructions below. Because this project is still in progress. the instructions and files may change:
 
@@ -38,7 +38,7 @@ To set up dishes-flow on your server, please follow the instructions below. Beca
 
 5. Now you are free to go. The entrance of dishes-flow is PHP/index.html. Have fun.
 
-##Done:
+## Done:
 
 * Wait staff menu
 
@@ -64,7 +64,7 @@ To set up dishes-flow on your server, please follow the instructions below. Beca
     caculation and printing receipt
     
     
-##To Do:
+## To Do:
 
 * user management and login system
 
