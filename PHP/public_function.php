@@ -48,4 +48,14 @@ function get_max_id($connection, $dbname)
     return -1;
   return $row[0];
 }
+
+function in_stock($connection, $dbname, $id)
+{
+  $buffer = pg_query($connection,"SELECT available FROM $dbname WHERE id=$id")
+  or die("Query error:" . pg_last_error());
+  $row = pg_fetch_row($buffer);
+  if($row == null)//if can not find this item
+    return false;
+  return $row[0];
+}
 ?>
